@@ -1,0 +1,18 @@
+public void kopiraj(DataTable dt, ListView LV)
+{
+    LV.View = View.Details;
+	LV.Columns.Clear();
+    foreach (DataColumn col in dt.Columns)
+    {
+        LV.Columns.Add(col.ColumnName);
+    }
+    LV.Items.Clear();
+    LV.FullRowSelect = true;
+    foreach (DataRow row in dt.Rows)
+    {
+        ListViewItem item = new ListViewItem(row[0].ToString());
+        for (int i = 1; i < dt.Columns.Count; i++)
+            item.SubItems.Add(row[i].ToString());
+        LV.Items.Add(item);
+    }
+}
