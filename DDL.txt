@@ -1,0 +1,258 @@
+ddl-01-02
+ALTER TABLE Rezultat
+ADD Napomena_o_rezultatu ntext;
+
+CREATE TABLE VLASNIK(
+jmbg char(13) not null primary key,
+ime nvarchar(25) not null,
+prezime nvarchar(25) not null,
+adresa nvarchar(40)
+);
+
+ALTER TABLE PAS
+ADD sifvlas char(13) FOREIGN KEY REFERENCES VLASNIK(jmbg);
+
+CREATE TABLE POL(
+sifp int not null primary key,
+naziv nvarchar(10) not null
+);
+
+ALTER TABLE PAS
+ADD sifp int FOREIGN KEY REFERENCES POL(sifp);
+
+ddl-03-04
+alter table Producent
+add VebStranica varchar(50);
+
+create table Festival
+(
+FestivalID int not null primary key,
+Naziv nvarchar(25) not null
+);
+
+create table Nagrada
+(
+FilmID int not null foreign key references Film(FilmID),
+FestivalID int not null foreign key references Festival(FestivalID),
+Godina int not null,
+primary key(FilmID,FestivalID,Godina)
+);
+
+ddl-05-06
+create table Takmicenje
+(
+TakmicenjeID int not null primary key,
+naziv nvarchar(50) not null
+);
+
+create table Utakmica
+(
+UtakmicaID int not null primary key,
+TakmicenjeID int not null foreign key references Takmicenje(TakmicenjeID),
+DomacinID int not null foreign key references Klub(KlubID),
+GostID int not null foreign key references Klub(KlubID),
+Datum_i_vreme datetime not null
+);
+
+create table Igrac_Utakmica
+(
+UtakmicaID int not null foreign key references Utakmica(UtakmicaID),
+IgracID int not null foreign key references Igrac(IgracID),
+golovi int,
+crveni_karton bit,
+zuti_karton bit,
+napravio_faulova int,
+fauliran int,
+primary key(UtakmicaID,IgracID)
+);
+
+ddl-07-08
+alter table Turisticka_Destinacija
+add Mogucnost_dodatnih_obilazaka bit;
+
+create table Obilazak
+(
+ObilazakID int not null primary key,
+Naziv nvarchar(50),
+Cena float
+);
+
+create table Obilazak_Aranzman
+(
+ObilazakID int not null foreign key references Obilazak(ObilazakID),
+AranzmanID int not null foreign key references Turisticki_Aranzman(AranzmanID),
+DatumObilaska datetime not null,
+primary key(ObilazakID,AranzmanID,DatumObilaska)
+);
+
+ddl-09-10
+CREATE TABLE Drzava(
+Pozivni varchar(5) not null primary key,
+Naziv nvarchar(25) not null,
+BrStanovnika int not null
+);
+
+CREATE TABLE Grad(
+Postanski char(5) not null primary key,
+Naziv nvarchar(25) not null,
+Pozivni char(3) not null,
+BrStanovnika int not null,
+DrzavaPozivni varchar(5) not null 
+	foreign key references Drzava(Pozivni)
+);
+
+ALTER TABLE Lokalitet
+ADD GradPostB char(5) foreign key references Grad(Postanski);
+
+ddl-11-12
+create table Tip_Kartice
+(
+TipID int not null primary key,
+Naziv nvarchar(25) not null,
+opis nvarchar(500)
+);
+
+create table Kartica
+(
+KarticaID int not null primary key,
+DatumVazenja datetime not null,
+TipID int not null foreign key references Tip_Kartice(TipID)
+);
+
+alter table Pretplatnik
+add BrojKartice int foreign key references Kartica(KarticaID);
+
+ddl-13-14
+create table Izdavac
+(
+IzdavacID int not null primary key,
+Naziv nvarchar(50) not null
+);
+
+create Table Format_Knjige
+(
+FormatID int not null primary key,
+Oznaka nvarchar(5) not null,
+KratakOpis nvarchar(200)
+);
+
+create table Izdanje
+(
+IzdavacID int not null foreign key references Izdavac(IzdavacID),
+KnjigaID int not null foreign key references Knjiga(KnjigaID),
+FormatID int not null foreign key references Format_Knjige(FormatID),
+tiraz int,
+cena float not null,
+primary key(IzdavacID,KnjigaID,FormatID)
+);
+
+ddl-15-16
+alter table Autor
+add zvanje nvarchar(15);
+
+create table Izdavac(
+IzdavacID int not null primary key,
+Naziv nvarchar(50) not null,
+Adresa nvarchar(50)
+);
+
+create table KnjigaIzdavac(
+KnjigaID int not null foreign key references Knjiga(KnjigaID),
+IzdavacID int not null foreign key references Izdavac(IzdavacID),
+primary key(IzdavacID,KnjigaID),
+Godina datetime not null
+);
+
+ddl-17-18
+alter table Vozilo
+add TrenutnaVrednost float;
+
+create table Prekrsaj
+(
+PrekrsajID int not null primary key,
+Datum datetime not null,
+Naziv nvarchar(50),
+Opis nvarchar(500)
+);
+
+create table Vozac_Prekrsaj
+(
+PrekrsajID int not null foreign key references Prekrsaj(PrekrsajID),
+VozacID int not null foreign key references Vozac(VozacID),
+primary key(PrekrsajID,VozacID)
+);
+
+ddl-19-20
+alter table Pakovanje
+add Oblik nvarchar(20);
+
+create table Nezeljeni_Efekat
+(
+EfekatID int not null primary key,
+Opis nvarchar(100) not null
+);
+
+create table Lek_Efekat
+(
+EfekatID int not null foreign key references Nezeljeni_Efekat(EfekatID),
+LekID int not null foreign key references Lek(LekID),
+primary key(EfekatID,LekID)
+);
+
+ddl-21-22
+CREATE TABLE Sektor(
+SektorID int not null primary key,
+Naziv nvarchar(25) not null,
+Opis_delatnosti ntext
+);
+
+CREATE TABLE Kancelarija(
+RedniBroj int not null primary key,
+Velicina float not null,
+Telefon varchar(15),
+Sifra_sektora int not foreign key references Sektor(SektorID)
+);
+
+ALTER TABLE Radnik
+ADD BrojKancelarije int not foreign key references Kancelarija(RedniBroj);
+
+CREATE TABLE Sef(
+RadnikID int not foreign key references Radnik(RadnikID),
+SektorID int not foreign key references Sektor(SektorID),
+primary key(RadnikID,SektorID)
+);
+
+ddl-23-24
+ALTER TABLE Lekar
+ADD mejl varchar(40);
+
+CREATE TABLE Specijalnost(
+SpecID int not null primary key,
+Naziv nvarchar(25) not null,
+Opis_delatnosti ntext
+);
+
+CREATE TABLE Lekar_Specijalnost(
+LekarID int not foreign key references Lekar(LekarID),
+SpecID int not foreign key references Specijalnost(SpecID),
+primary key(LekarID,SpecID)
+);
+
+ddl-25-26
+create table Komunikacija
+(
+ProfesorID int not null foreign key references Profesor(ProfesorID),
+StudentID int not null foreign key references Student(StudentID),
+TipKontakta nvarchar(10) not null,
+Detalji nText,
+primary key(ProfesorID,StudentID)
+);
+
+create table Zvanje
+(
+ZvanjeID int not null primary key,
+Naziv nvarchar(20) not null
+);
+
+alter table Profesor
+add ZvanjeID int;
