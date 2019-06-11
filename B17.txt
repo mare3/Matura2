@@ -1,0 +1,101 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Windows.Forms;
+using System.Data.SqlClient;
+
+namespace B17
+{
+    public partial class Form3 : Form
+    {
+        SqlConnection conn;
+        SqlCommand comm;
+        SqlDataReader dr;
+        SqlDataAdapter adp;
+        
+
+        public Form3()
+        {
+            InitializeComponent();
+            conn = new SqlConnection(@"Data Source=ETS-ZEMUN\SQLEXPRESS;Initial Catalog=DATA_B17;Integrated Security=True");
+        }
+
+        private void Form3_Load(object sender, EventArgs e)
+        {
+            try
+            {
+                conn.Open();
+
+                comm = new SqlCommand("SELECT RTRIM(ProizvodjacID)+'-'+Naziv FROM Proizvodjac;", conn);
+                dr = comm.ExecuteReader();
+                while (dr.Read())
+                {
+                    comboBox1.Items.Add(dr[0].ToString());
+                }
+                dr.Close();
+                comm = new SqlCommand("SELECT RTRIM(ModelID)+'-'+Naziv FROM Model;", conn);
+                dr = comm.ExecuteReader();
+                while (dr.Read())
+                {
+                    comboBox2.Items.Add(dr[0].ToString());
+                }
+
+            }
+            catch (SqlException ex)
+            {
+                MessageBox.Show(ex.Message, "Greška", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+
+                conn.Close();
+
+            }
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                conn.Open();
+                if (radioButton1.Checked == true)
+                {
+                    comm = new SqlCommand("SELECT Vozac.VozacID,Ime,Prezime,RegistarskiBroj,Polisa.PolisaID,DatumPocetka,DatumZavrsetka FROM Vozac,Vozilo,Polisa,Vozilo_Vozac WHERE Vozac.VozacID = Vozilo_Vozac.VozacID AND Vozilo.VoziloID = Vozilo_Vozac.VoziloID AND Vozilo.PolisaID = Polisa.PolisaID AND Vozilo.ProizvodjacID="+comboBox1.Text.Split('-')[0]+" AND Vozilo.ModelID="+ comboBox2.Text.Split('-')[0] +"AND DatumZavrsetka IS NULL;", conn);
+                }
+                else if (radioButton2.Checked == true)
+                {
+                    comm = new SqlCommand("SELECT Vozac.VozacID,Ime,Prezime,RegistarskiBroj,Polisa.PolisaID,DatumPocetka,DatumZavrsetka FROM Vozac,Vozilo,Polisa,Vozilo_Vozac WHERE Vozac.VozacID = Vozilo_Vozac.VozacID AND Vozilo.VoziloID = Vozilo_Vozac.VoziloID AND Vozilo.PolisaID = Polisa.PolisaID AND Vozilo.ProizvodjacID="+comboBox1.Text.Split('-')[0]+" AND Vozilo.ModelID="+ comboBox2.Text.Split('-')[0] + "AND DatumZavrsetka IS NOT NULL;", conn);
+                }
+                else if (radioButton3.Checked == true)
+                {
+                    comm = new SqlCommand("SELECT Vozac.VozacID,Ime,Prezime,RegistarskiBroj,Polisa.PolisaID,DatumPocetka,DatumZavrsetka FROM Vozac,Vozilo,Polisa,Vozilo_Vozac WHERE Vozac.VozacID = Vozilo_Vozac.VozacID AND Vozilo.VoziloID = Vozilo_Vozac.VoziloID AND Vozilo.PolisaID = Polisa.PolisaID AND Vozilo.ProizvodjacID="+comboBox1.Text.Split('-')[0]+" AND Vozilo.ModelID="+ comboBox2.Text.Split('-')[0] +";", conn);
+                }
+
+                adp = new SqlDataAdapter(comm);
+                DataSet ds = new DataSet();
+                adp.Fill(ds);
+                dataGridView1.DataSource = ds.Tables[0];
+
+            }
+            catch (SqlException ex)
+            {
+                MessageBox.Show(ex.Message, "Greška", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+
+                conn.Close();
+
+            }
+        }
+    }
+}

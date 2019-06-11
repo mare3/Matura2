@@ -1,0 +1,91 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Windows.Forms;
+using System.Data.SqlClient;
+
+namespace B15
+{
+    public partial class Form3 : Form
+    {
+
+        SqlConnection conn;
+        SqlCommand comm;
+        SqlDataReader dr;
+        public Form3()
+        {
+            InitializeComponent();
+            conn = new SqlConnection(@"Data Source=ETS-ZEMUN\SQLEXPRESS;Initial Catalog=DATA_B15;Integrated Security=True");
+        }
+
+        private void Form3_Load(object sender, EventArgs e)
+        {
+            try
+            {
+
+                conn.Open();
+                comm = new SqlCommand("SELECT RTRIM(KnjigaID)+'-'+Naziv FROM Knjiga;",conn);
+                dr = comm.ExecuteReader();
+                while (dr.Read())
+                {
+
+                    comboBox1.Items.Add(dr[0].ToString());
+
+                }
+                dr.Close();
+
+            }
+            catch (SqlException ex)
+            {
+                MessageBox.Show(ex.Message, "Greška", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+
+                conn.Close();
+
+            }
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                List<DataItem> CHART_ITEMS = new List<DataItem>();
+                conn.Open();
+                comm = new SqlCommand("SELECT COUNT(KnjigaID) , DATEPART(MONTH,DatumUzimanja) FROM Na_Citanju WHERE DATEPART(YEAR,DatumUzimanja) = "+ textBox1.Text +"AND KnjigaID="+ comboBox1.Text.Split('-')[0] +" GROUP BY DatumUzimanja, DATEPART(MONTH,DatumUzimanja);",conn);
+                dr = comm.ExecuteReader();
+                while (dr.Read())
+                {
+
+                    CHART_ITEMS.Add(new DataItem(dr[0].ToString(),dr[1].ToString()));
+
+                }
+                dr.Close();
+                chart1.Series[0].ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+                chart1.Series[0].YValueMembers = "Value";
+                chart1.Series[0].XValueMember = "Text";
+                chart1.DataSource = CHART_ITEMS;
+            }
+            catch (SqlException ex)
+            {
+                MessageBox.Show(ex.Message, "Greška", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+
+                conn.Close();
+
+            }
+        }
+    }
+}
