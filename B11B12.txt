@@ -1,0 +1,49 @@
+private void Form3_Load(object sender, EventArgs e)
+        {
+            string cmd = "SELECT * FROM Pozorisni_Komad";
+            try
+            {
+                conn.Open();
+                comm = new SqlCommand(cmd, conn);
+                adp = new SqlDataAdapter(comm);
+                DataSet ds = new DataSet();
+                adp.Fill(ds);
+                dataGridView1.DataSource = ds.Tables[0];
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Greska", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
+            }
+            finally
+            {
+                conn.Close();
+            }
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            string cmd = "SELECT NazivTrupe, SUM(CenaKarte) AS Ukupni_Prihodi FROM Pozorisna_Trupa,Predstava WHERE(Pozorisna_Trupa.TrupaID = Predstava.TrupaID AND Datum BETWEEN '"+numericUpDown1.Value+"/"+numericUpDown2.Value+"/"+textBox3.Text+"' AND '"+numericUpDown3.Value+"/"+numericUpDown4.Value+"/"+textBox1.Text+"') GROUP BY NazivTrupe";
+            try
+            {
+                conn.Open();
+                comm = new SqlCommand(cmd, conn);
+                adp = new SqlDataAdapter(comm);
+                DataSet ds = new DataSet();
+                adp.Fill(ds);
+                dataGridView2.DataSource = ds.Tables[0];
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Greska", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
+            }
+            finally
+            {
+                conn.Close();
+            }
+        
+        }

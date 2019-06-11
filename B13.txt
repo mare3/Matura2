@@ -1,0 +1,81 @@
+List<DataItem> DATA_ITEMS;
+        SqlConnection conn;
+        SqlCommand comm;
+        SqlDataAdapter adp;
+        SqlDataReader dr;
+        public Form3()
+        {
+            InitializeComponent();
+            conn = new SqlConnection(@"Data Source=ETS-ZEMUN\SQLEXPRESS;Initial Catalog=Kolekcija_Knjiga;Integrated Security=True");
+            DATA_ITEMS = new List<DataItem>();
+
+            try
+            {
+                conn.Open();
+                comm = new SqlCommand("SELECT KategorijaID,Naziv FROM Kategorija;", conn);
+                dr = comm.ExecuteReader();
+
+                while (dr.Read())
+                {
+                    DATA_ITEMS.Add(new DataItem(dr[0].ToString(), dr[1].ToString()));
+                    checkedListBox1.Items.Add(DATA_ITEMS.Last().Text);
+
+                }
+                dr.Close();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+            finally
+            {
+                conn.Close();
+            }
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            List<string> ids = new List<string>();
+            List<DataItem> data_values = new List<DataItem>();
+
+            for (int i = 0; i < checkedListBox1.Items.Count; i++)
+            {
+                if (checkedListBox1.GetItemChecked(i) == true)
+                {
+                    ids.Add(DATA_ITEMS.Find(x => x.Text == checkedListBox1.GetItemText(checkedListBox1.Items[i])).Value);
+
+                }
+            }
+
+            foreach (string name in ids)
+            {
+                try
+                {
+                    conn.Open();
+                    comm = new SqlCommand("SELECT COUNT(KnjigaID) FROM Knjiga WHERE  KategorijaID=" + name + ";", conn);
+                    string temp = comm.ExecuteScalar().ToString();
+
+                    data_values.Add(new DataItem(temp, DATA_ITEMS.Find(x => x.Value == name).Text));
+
+                    chart1.DataSource = data_values;
+                    chart1.DataBind();
+                    chart1.Series[0].XValueMember = "Text";
+                    chart1.Series[0].YValueMembers = "Value";
+                    chart1.Series[0].Name = "Broj knjiga";
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message);
+                }
+                finally
+                {
+                    conn.Close();
+                }
+            }
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+    }
