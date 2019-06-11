@@ -1,0 +1,56 @@
+private void button1_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                conn.Open();
+                comm = new SqlCommand("SELECT Naziv,KoordinateDuzina,KoordinateSirina FROM Lokalitet WHERE LokalitetID IN (SELECT LokalitetID FROM Antikvitet WHERE TipAntikvitetaID = (SELECT TipAntikvitetaID FROM Tip_Antikviteta WHERE Tip='"+textBox1.Text+"'));", conn);
+                adp = new SqlDataAdapter(comm);
+                DataSet ds = new DataSet();
+                adp.Fill(ds);
+                dataGridView1.DataSource = ds.Tables[0];
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+            finally
+            {
+                conn.Close();
+            }
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            Point origin = new Point(pictureBox1.Width / 2, pictureBox1.Height / 2);
+            float coord_x =  float.Parse(dataGridView1.SelectedRows[0].Cells[1].Value.ToString());
+            float coord_y =  float.Parse(dataGridView1.SelectedRows[0].Cells[2].Value.ToString());
+            pictureBox1.CreateGraphics().Clear(Color.White);
+            plotgrid();
+            Bitmap b = (Bitmap)pictureBox1.Image;
+            //Point origin = new Point(pictureBox1.Width / 2, pictureBox1.Height / 2);
+            pictureBox1.BackColor = Color.White;
+            Graphics g = Graphics.FromImage(b);
+            //g.Clear(Color.White);
+            g.FillEllipse(Brushes.IndianRed, coord_x, coord_y, 5, 5);
+            pictureBox1.Image = b;
+            pictureBox1.Invalidate();
+
+        }
+        private void plotgrid()
+        {
+            Bitmap b = new Bitmap(pictureBox1.Width, pictureBox1.Height);
+            Point origin = new Point(pictureBox1.Width / 2, pictureBox1.Height / 2);
+            pictureBox1.BackColor = Color.White;
+            Graphics g = Graphics.FromImage(b);
+            g.DrawRectangle(new Pen(Brushes.Blue, 5), 0.0f, 0.0f, pictureBox1.Width - 1, pictureBox1.Height - 1);
+            g.DrawLine(new Pen(Brushes.Blue, 5), new Point(pictureBox1.Width / 2, 1), new Point(pictureBox1.Width / 2, pictureBox1.Height - 1));
+            g.DrawLine(new Pen(Brushes.Blue, 5), new Point(0, pictureBox1.Height / 2), new Point(pictureBox1.Width - 1, pictureBox1.Height / 2));
+            pictureBox1.Image = b;
+            pictureBox1.Invalidate();
+        }
+        private void Form3_Load(object sender, EventArgs e)
+        {
+            plotgrid();
+        }
+    }
